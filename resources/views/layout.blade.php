@@ -15,6 +15,39 @@
     integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
     crossorigin="anonymous"></script>
   <style>
+    .comments-section {
+      padding: 20px;
+      background-color: #f9f9f9;
+      border-radius: 10px;
+    }
+
+    .comments-section h3 {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .card {
+      border-radius: 8px;
+    }
+
+    .card-header {
+      background-color: #f1f1f1;
+      font-size: 1rem;
+    }
+
+    .card-text {
+      font-size: 1rem;
+      color: #555;
+    }
+
+    .add-comment-section {
+      padding: 20px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+    }
+
     #toast-container {
       position: fixed;
       top: 20px;
