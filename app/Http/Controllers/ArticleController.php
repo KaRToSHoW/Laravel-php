@@ -52,7 +52,7 @@ class ArticleController extends Controller
         $user = User::findOrFail($article->user_id);
 
         // Получение комментариев статьи с автором
-        $comments = $article->comments()->with('user')->get();
+        $comments = $article->comment()->get();
 
         return view('article.show', [
             'article' => $article,

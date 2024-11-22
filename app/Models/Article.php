@@ -10,7 +10,7 @@ class Article extends Model
 {
     use HasFactory;
 
-    public function comments(): HasMany
+    public function comment(): HasMany
     {
         return $this->hasMany(Comment::class);
     }

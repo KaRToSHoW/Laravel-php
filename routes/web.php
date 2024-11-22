@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CommentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\AuthController;
@@ -22,6 +23,14 @@ Route::post("/auth/register", [AuthController::class,"register"]);
 
 //Article
 Route::resource('/article', ArticleController::class);
+
+//Comment
+
+Route::post("/comment", [CommentController::class, 'store' ]);
+Route::get('/comment/{id}/edit', [CommentController::class,'edit']);
+Route::post('/comment/{comment}/update', [CommentController::class,'update']);
+Route::get('/comment/{id}/delete', [CommentController::class,'delete']);
+
 
 //Main
 Route::get('/', [MainController::class, 'index']);
