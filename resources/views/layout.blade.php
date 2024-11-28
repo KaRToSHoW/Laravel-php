@@ -131,7 +131,21 @@
             </ul>
           </li> -->
         </ul>
-        <a href="/auth/signup" class="btn btn-outline-success">SignUp</a>
+        <ul class="navbar-nav mb-2 mb-lg-0 gap-3">
+          @guest
+            <li class="nav-item">
+              <a href="/auth/signup" class="btn btn-outline-success">SignUp</a>
+            </li>
+            <li class="nav-item">
+              <a href="/auth/login" class="btn btn-outline-success">SignIn</a>
+            </li>
+          @endguest
+          @auth
+            <li class="nav-item">
+              <a href="/auth/logout" class="btn btn-outline-danger">Logout</a>
+            </li>
+          @endauth
+        </ul>
       </div>
     </div>
   </nav>
