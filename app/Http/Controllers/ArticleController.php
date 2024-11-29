@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\User;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 class ArticleController extends Controller
 {
     /**
@@ -30,6 +31,7 @@ class ArticleController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('create', [self::class]);
         $request->validate([
             'date' => 'date',
             'name' => 'required|min:5|max:100',
@@ -76,6 +78,8 @@ class ArticleController extends Controller
      */
     public function update(Request $request, Article $article)
     {
+        Gate::authorize('update', $article->id);
+        // $response = Gate::inspect('update', $article->id);
         $request->validate([
             'date' => 'date',
             'name' => 'required|min:5|max:100',
@@ -89,13 +93,13 @@ class ArticleController extends Controller
             return redirect('/article')->with('status', 'Update succsess!');
         else
             return redirect('')->route('article.edit', ['article' => $article->id])->with('status', 'Update failed! Please try again.');
-        ;
     }
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Article $article)
     {
+        Gate::authorize('delete', [self::class]);
         if ($article->delete())
             return redirect('/article')->with('status', value: 'Delete succsess!');
         else

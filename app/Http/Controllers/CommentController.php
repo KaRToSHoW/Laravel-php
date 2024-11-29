@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Comment;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
@@ -16,7 +18,7 @@ class CommentController extends Controller
         $comment->name = $request->name;
         $comment->desc = $request->desc;
         $comment->article_id = $request->article_id;
-        $comment->user_id = 1;
+        $comment->user_id = Auth::id();
         if ($comment->save())
             return redirect()->back()->with('status', 'Your comment has been added!');
         else
@@ -24,26 +26,27 @@ class CommentController extends Controller
         ;
     }
 
-    public function delete(Comment $id)
+    public function delete($id)
     {
-        if ($id->delete()) {
-            return redirect()->back()->with('status', 'Your comment has been deleted.');
-        } else {
-            return redirect()->back()->with('status', 'Your comment could not be deleted!');
-        }
+        $comment = Comment::findOrFail($id);
+        Gate::authorize('update_comment', $comment);
+        $comment->delete();
+        return redirect()->route('article.show', ['article' => $comment->article_id])->with('status', 'Delete success');
     }
     public function edit($id)
     {
-        $comment = Comment::findOrFail( $id );
+        $comment = Comment::findOrFail($id);
+        Gate::authorize('update_comment', $comment);
         return view('comments.update', ['comment' => $comment]);
     }
     public function update(Request $request, Comment $comment)
     {
+        Gate::authorize('update_comment', $comment);
         $request->validate([
             "name" => "required|min:3",
             "desc" => "required|min:5",
         ]);
-        
+
         $comment->name = $request->name;
         $comment->desc = $request->desc;
 
@@ -53,6 +56,6 @@ class CommentController extends Controller
             return redirect()->back()->with('status', 'Update failed! Please try again.');
         }
     }
-    
+
 
 }
