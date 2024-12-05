@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\User;
+use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
+use App\Events\NewArticleEvent;
 class ArticleController extends Controller
 {
     /**
@@ -42,7 +43,9 @@ class ArticleController extends Controller
         $article->name = $request->name;
         $article->desc = $request->desc;
         $article->user_id = 1;
-        $article->save();
+        if ($article->save()){
+            NewArticleEvent::dispatch($article);
+        }
         return redirect('/article');
     }
 
@@ -51,11 +54,10 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
+
+        $comments = Comment::where('article_id', $article->id)->where('accept', true)->get();
+
         $user = User::findOrFail($article->user_id);
-
-        // Получение комментариев статьи с автором
-        $comments = $article->comment()->get();
-
         return view('article.show', [
             'article' => $article,
             'user' => $user,
