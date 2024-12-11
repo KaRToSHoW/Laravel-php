@@ -14,6 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
     crossorigin="anonymous"></script>
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <style>
     .comments-section {
       padding: 20px;
@@ -108,54 +109,57 @@
             <a class="nav-link active" aria-current="page" href="/article">Articles</a>
           </li>
           @can('create')
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/article/create">Create article</a>
-          </li>
-          @endcan
+        <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="/article/create">Create article</a>
+        </li>
+      @endcan
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="/about">О нас</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/comment/show">Check comments</a>
-          </li>
+          @can('create')
+        <li class="nav-item">
+        <a class="nav-link" href="/comment/show">Check comments</a>
+        </li>
+      @endcan
           <li class="nav-item">
             <a class="nav-link" href="/contact">Контакты</a>
           </li>
-          <!-- <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
-              aria-expanded="false">
-              Dropdown
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
-            </ul>
-          </li> -->
+          @auth
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Notifications {{auth()->user()->unreadNotifications->count()}}
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            @foreach(auth()->user()->unreadNotifications as $notification)
+              <li><a class="dropdown-item" href="{{route('article.show', ['article'=>$notification->data['article']['id'], 'notify'=>$notification->id])}}">{{$notification->data['article']['name']}}: {{$notification->data['comment_name']}}</a></li>
+            @endforeach
+          </ul>
+        </li>
+        @endauth
         </ul>
         <ul class="navbar-nav mb-2 mb-lg-0 gap-3">
           @guest
-            <li class="nav-item">
-              <a href="/auth/signup" class="btn btn-outline-success">SignUp</a>
-            </li>
-            <li class="nav-item">
-              <a href="/auth/login" class="btn btn-outline-success">SignIn</a>
-            </li>
-          @endguest
+        <li class="nav-item">
+        <a href="/auth/signup" class="btn btn-outline-success">SignUp</a>
+        </li>
+        <li class="nav-item">
+        <a href="/auth/login" class="btn btn-outline-success">SignIn</a>
+        </li>
+      @endguest
           @auth
-            <li class="nav-item">
-              <a href="/auth/logout" class="btn btn-outline-danger">Logout</a>
-            </li>
-          @endauth
+        <li class="nav-item">
+        <a href="/auth/logout" class="btn btn-outline-danger">Logout</a>
+        </li>
+      @endauth
         </ul>
       </div>
     </div>
   </nav>
 </header>
 <main>
+  <div id="app">
+    <App/>
+  </div>
   <div class="container mt-3">
     @yield('content')
   </div>
