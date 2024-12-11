@@ -7,15 +7,20 @@ use App\Models\Comment;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use App\Jobs\VeryLongJob;
 use App\Models\Article;
 use App\Models\User;
-
 
 class CommentController extends Controller
 {
     public function store(Request $request)
     {
+        $keys = DB::table('cache')->whereRaw('`key` GLOB :key', [':key' => 'comments*[0-9]'])->get();
+        foreach ($keys as $param) {
+            Cache::forget($param->key);
+        }
         $article = Article::findOrFail($request->article_id);
         $request->validate([
             "name" => "required|min:3",
@@ -34,19 +39,30 @@ class CommentController extends Controller
 
     public function delete($id)
     {
+        Cache::flush();
         $comment = Comment::findOrFail($id);
         Gate::authorize('update_comment', $comment);
         $comment->delete();
         return redirect()->route('article.show', ['article' => $comment->article_id])->with('status', 'Delete success');
     }
+
     public function edit($id)
     {
         $comment = Comment::findOrFail($id);
         Gate::authorize('update_comment', $comment);
         return view('comments.update', ['comment' => $comment]);
     }
+
     public function update(Request $request, Comment $comment)
     {
+        $keys = DB::table('cache')->whereRaw('`key` GLOB :key', [':key' => 'comments*[0-9]'])->get();
+        foreach ($keys as $param) {
+            Cache::forget($param->key);
+        }
+        $keys = DB::table('cache')->whereRaw('`key` GLOB :key', [':key' => 'comment_article' . $comment->article_id])->get();
+        foreach ($keys as $param) {
+            Cache::forget($param->key);
+        }
         Gate::authorize('update_comment', $comment);
         $request->validate([
             "name" => "required|min:3",
@@ -64,8 +80,10 @@ class CommentController extends Controller
     }
     public function show()
     {
-        $Comments = Comment::all();
-
+        $page = isset($_GET['page']) ? $_GET['page'] : 0;
+        $Comments = Cache::remember('comments' . $page, 3000, function () {
+            return Comment::latest()->paginate(10);
+        });
         return view('comments.show', [
             'Comments' => $Comments,
         ]);
@@ -73,15 +91,25 @@ class CommentController extends Controller
 
     public function accept(Comment $comment)
     {
+        $keys = DB::table('cache')->whereRaw('`key` GLOB :key', [':key' => 'comments*[0-9]'])->get();
+        foreach ($keys as $param) {
+            Cache::forget($param->key);
+        }
+        $keys = DB::table('cache')->whereRaw('`key` GLOB :key', [':key' => 'comment_article' . $comment->article_id])->get();
+        foreach ($keys as $param) {
+            Cache::forget($param->key);
+        }
         $users = User::where('id', '!=', $comment->user_id)->get();
         $article = Article::findOrFail($comment->article_id);
         $comment->accept = true;
-        if ($comment->save()) Notification::send($users, new NewCommentNotify($article, $comment->name));
+        if ($comment->save())
+            Notification::send($users, new NewCommentNotify($article, $comment->name));
         return redirect()->route('comment.show')->with('status', 'Comment accepted');
     }
 
     public function reject(Comment $comment)
     {
+        Cache::flush();
         $comment->accept = false;
         $comment->save();
         return redirect()->route('comment.show')->with('status', 'Comment rejected');

@@ -37,5 +37,5 @@
         @endforeach
     </tbody>
 </table>
-
+{{ $Comments->links() }}
 @endsection
